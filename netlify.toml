@@ -1,0 +1,37 @@
+[build]
+  publish = "public"
+
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-types"
+  to = "/explorer-types.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-moves"
+  to = "/explorer-moves.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-abilities"
+  to = "/explorer-abilities.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-items"
+  to = "/explorer-items.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-regions"
+  to = "/explorer-regions.html"
+  status = 200
+
+[[redirects]]
+  from = "/explorer-generations"
+  to = "/explorer-generations.html"
+  status = 200
