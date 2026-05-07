@@ -1,3 +1,5 @@
+URL = [projeto-pokedex-api.netlify.app](https://projeto-pokedex-api.netlify.app/)
+
 # Pokédex
 
 Aplicação estática em HTML, CSS e JavaScript para explorar dados da [PokéAPI](https://pokeapi.co/).
