@@ -497,7 +497,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Base da API usada para consultar itens.
         const API_URL = 'https://pokeapi.co/api/v2/';
+        // Estado local para paginação e filtro.
         const ITEMS_PER_PAGE = 8;
         let allItems = [];
         let filteredItems = [];
@@ -508,6 +510,7 @@
         const itemModalSubtitle = document.getElementById('itemModalSubtitle');
         const itemModalBody = document.getElementById('itemModalBody');
 
+        // Carrega os itens e ordena por ID para manter a navegação previsivel.
         async function loadItems() {
             try {
                 const response = await fetch(`${API_URL}item?limit=2000`);
@@ -521,6 +524,7 @@
             }
         }
 
+        // Aplica o filtro de texto e reseta para a primeira pagina.
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             filteredItems = allItems.filter(item => item.name.includes(searchTerm));
@@ -528,6 +532,7 @@
             renderItems();
         }
 
+        // Renderiza apenas a fatia atual da lista filtrada.
         function renderItems() {
             const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
             const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -579,6 +584,7 @@
             }).join('');
         }
 
+        // Abre o modal com os detalhes completos do item selecionado.
         function openItemModal(itemName) {
             const item = allItems.find(i => i.name === itemName);
             if (!item) return;
@@ -643,6 +649,7 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // Fecha o modal e restaura a rolagem da pagina.
         function closeItemModal() {
             itemModal.classList.remove('active');
             itemModal.setAttribute('aria-hidden', 'true');

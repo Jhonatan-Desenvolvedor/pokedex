@@ -626,12 +626,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Base da API usada para buscar habilidades.
         const API_URL = 'https://pokeapi.co/api/v2/';
+        // Estado local para paginação e filtro.
         let allAbilities = [];
         let filteredAbilities = [];
         let currentAbilityPage = 1;
         const ABILITIES_PER_PAGE = 8;
 
+        // Busca todas as habilidades e prepara a primeira pagina.
         async function loadAbilities() {
             try {
                 const response = await fetch(`${API_URL}ability/?limit=400`);
@@ -649,6 +652,7 @@
             }
         }
 
+        // Aplica a busca digitada e volta para a primeira pagina.
         function applyAbilityFilter() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             filteredAbilities = allAbilities.filter(a => a.name.includes(searchTerm));
@@ -656,6 +660,7 @@
             renderAbilityPage();
         }
 
+        // Desenha apenas 8 cards por pagina.
         function renderAbilityPage() {
             const container = document.getElementById('abilitiesContainer');
             container.innerHTML = '';
@@ -707,6 +712,7 @@
             }
         }
 
+        // Abre o modal com os detalhes completos da habilidade.
         function openAbilityModal(ability) {
             const modal = document.getElementById('abilityModal');
             const title = document.getElementById('abilityModalTitle');
@@ -751,6 +757,7 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // Recupera do cache a habilidade para nao refazer a requisicao.
         function openAbilityModalByName(abilityName) {
             const modalAbility = allAbilities.find(ability => ability.name === abilityName);
             if (modalAbility) {
@@ -758,6 +765,7 @@
             }
         }
 
+        // Fecha o modal e devolve o controle da rolagem.
         function closeAbilityModal() {
             const modal = document.getElementById('abilityModal');
             modal.classList.remove('active');
@@ -765,6 +773,7 @@
             document.body.style.overflow = '';
         }
 
+        // Carrega os Pokemon relacionados para a lista inferior.
         async function loadPokemonByAbility(abilityName, total) {
             try {
                 const response = await fetch(`${API_URL}ability/${abilityName}`);
@@ -788,6 +797,7 @@
             }
         }
 
+        // Renderiza os Pokemon associados a habilidade selecionada.
         function displayPokemonList(abilityName, pokemonList) {
             const grid = document.getElementById('pokemonGrid');
             grid.innerHTML = '';
@@ -806,6 +816,7 @@
             });
         }
 
+        // Handler de busca; centraliza a atualizacao do filtro.
         function filterAbilities() {
             applyAbilityFilter();
         }

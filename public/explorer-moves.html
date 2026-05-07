@@ -534,12 +534,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Base da API usada para buscar dados dos movimentos.
         const API_URL = 'https://pokeapi.co/api/v2/';
+        // Estado local para paginação e filtro da listagem.
         let allMoves = [];
         let filteredMoves = [];
         let currentMovePage = 1;
         const MOVES_PER_PAGE = 8;
 
+        // Carrega todos os movimentos, depois recalcula a pagina atual filtrada.
         async function loadMoves() {
             try {
                 const response = await fetch(`${API_URL}move/?limit=900`);
@@ -557,6 +560,7 @@
             }
         }
 
+        // Aplica a busca digitada e reinicia a pagina para o primeiro resultado.
         function applyMoveFilter() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             filteredMoves = allMoves.filter(m => m.name.includes(searchTerm));
@@ -564,6 +568,7 @@
             renderMovesPage();
         }
 
+        // Renderiza somente os itens da pagina corrente.
         function renderMovesPage() {
             const container = document.getElementById('movesContainer');
             container.innerHTML = '';
@@ -624,6 +629,7 @@
             }
         }
 
+        // Monta o modal com os dados detalhados do movimento selecionado.
         function openMoveModal(move) {
             const modal = document.getElementById('moveModal');
             const title = document.getElementById('moveModalTitle');
@@ -666,6 +672,7 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // Fecha o modal e libera a rolagem da pagina.
         function closeMoveModal() {
             const modal = document.getElementById('moveModal');
             modal.classList.remove('active');
@@ -673,6 +680,7 @@
             document.body.style.overflow = '';
         }
 
+        // Handler da busca; apenas reaproveita o filtro centralizado.
         function filterMoves() {
             applyMoveFilter();
         }

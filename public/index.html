@@ -1183,6 +1183,7 @@
         // Tipo selecionado no filtro (vazio = sem filtro)
         let selectedType = '';
 
+        // Referencias do modal de detalhes do Pokemon.
         const pokemonModal = document.getElementById('pokemonModal');
         const pokemonModalTitle = document.getElementById('pokemonModalTitle');
         const pokemonModalSubtitle = document.getElementById('pokemonModalSubtitle');
@@ -1393,6 +1394,7 @@
             }
         }
 
+        // Preenche e abre o modal com os dados completos do Pokemon.
         function openPokemonModal(pokemon) {
             const imageUrl = pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default || '';
             const heightMeters = (pokemon.height / 10).toFixed(1);
@@ -1409,12 +1411,14 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // Fecha o modal e libera a pagina para rolagem novamente.
         function closePokemonModal() {
             pokemonModal.classList.remove('active');
             pokemonModal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
         }
 
+        // Gera o HTML do modal a partir do objeto retornado pela API.
         function buildPokemonModalHTML(pokemon, imageUrl, heightMeters, weightKg, typeBadges) {
             const abilitiesHTML = pokemon.abilities.map(ability => `
                 <div class="ability-item">
@@ -1547,6 +1551,7 @@
             `;
         }
 
+        // Caminha pelo objeto de sprites e extrai todas as imagens disponiveis.
         function collectSpriteEntries(sprites) {
             const entries = [];
             const seen = new Set();
