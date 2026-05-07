@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Tipos - Pokédex</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+        :root {
+            --pokemon-red: #DC143C;
+            --pokemon-yellow: #FFD700;
+            --pokemon-blue: #1E90FF;
+            --pokemon-black: #1a1a1a;
+            --pokemon-white: #F5F5F5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(30, 144, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            box-shadow: 0 8px 32px rgba(220, 20, 60, 0.3);
+            padding: 1rem 0;
+            border-bottom: 4px solid var(--pokemon-yellow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 28px;
+            color: white !important;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover {
+            color: var(--pokemon-yellow);
+        }
+
+        .container-main {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-header h1 {
+            color: var(--pokemon-red);
+            font-weight: 800;
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        /* ========== CARDS DE TIPOS ========== */
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .type-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--pokemon-red) 0%, var(--pokemon-blue) 100%);
+            z-index: 1;
+        }
+
+        .type-card:hover {
+            transform: translateY(-16px) scale(1.02);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+            border-color: var(--pokemon-red);
+        }
+
+        .type-card-header {
+            background: linear-gradient(135deg, #F5F5F5 0%, #EFEFEF 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .type-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .type-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--pokemon-black);
+            text-transform: capitalize;
+            margin-bottom: 10px;
+        }
+
+        .type-info {
+            padding: 20px;
+        }
+
+        .type-stat {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .type-stat:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pokemon-red);
+        }
+
+        /* ========== POKÉMON DO TIPO ========== */
+        .pokemon-list {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .pokemon-list.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .pokemon-list h3 {
+            color: var(--pokemon-red);
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .pokemon-item {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pokemon-item:hover {
+            border-color: var(--pokemon-red);
+            transform: translateY(-4px);
+            box-shadow: 0 5px 15px rgba(220, 20, 60, 0.2);
+        }
+
+        .pokemon-name {
+            font-weight: 700;
+            color: var(--pokemon-black);
+            text-transform: capitalize;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 32px;
+            }
+
+            .types-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar-brand {
+                font-size: 20px;
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-section:last-child {
+            border-bottom: none;
+        }
+
+        .modal-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--pokemon-red);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(220, 20, 60, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid var(--pokemon-red);
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pokemon-black);
+            text-transform: capitalize;
+        }
+
+        .list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .list-item {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            text-transform: capitalize;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--pokemon-black);
+        }
+
+        .details-btn {
+            margin-top: 14px;
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(220, 20, 60, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a href="index.html" class="navbar-brand" style="text-decoration: none;">
+                <i class="material-icons">circle</i>
+                Pokédex
+            </a>
+            <div class="nav-links">
+                <a href="index.html">
+                    <i class="material-icons">search</i>
+                    Explorar
+                </a>
+                <a href="explorer-types.html">
+                    <i class="material-icons">label</i>
+                    Tipos
+                </a>
+                <a href="explorer-moves.html">
+                    <i class="material-icons">flash_on</i>
+                    Movimentos
+                </a>
+                <a href="explorer-abilities.html">
+                    <i class="material-icons">psychology</i>
+                    Habilidades
+                </a>
+                <a href="explorer-items.html">
+                    <i class="material-icons">shopping_bag</i>
+                    Itens
+                </a>
+                <a href="explorer-regions.html">
+                    <i class="material-icons">map</i>
+                    Regioes
+                </a>
+                <a href="explorer-generations.html">
+                    <i class="material-icons">history</i>
+                    Geracoes
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-main">
+        <div class="page-header">
+            <h1><i class="material-icons" style="font-size: 48px;">label</i> Explorador de Tipos</h1>
+            <p>Explore todos os 18 tipos Pokémon e descubra seus pontos fortes e fracos</p>
+        </div>
+
+        <div id="typesContainer" class="types-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 20px;">Carregando tipos...</p>
+            </div>
+        </div>
+
+        <div id="pokemonContainer" class="pokemon-list">
+            <h3><i class="material-icons">pets</i> Pokémon deste tipo</h3>
+            <div id="pokemonGrid" class="pokemon-grid"></div>
+        </div>
+    </div>
+
+    <div id="typeModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="typeModalTitle">
+            <div class="modal-header">
+                <div>
+                    <h2 id="typeModalTitle">Tipo</h2>
+                    <div id="typeModalSubtitle" style="font-size:14px;font-weight:600;opacity:.9;margin-top:6px;"></div>
+                </div>
+                <button class="modal-close" type="button" id="closeTypeModal">&times;</button>
+            </div>
+            <div id="typeModalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'https://pokeapi.co/api/v2/';
+        let allTypesCache = [];
+        
+        // Ícones para cada tipo
+        const typeIcons = {
+            normal: '⭕', fire: '🔥', water: '💧', electric: '⚡',
+            grass: '🌿', ice: '❄️', fighting: '👊', poison: '☠️',
+            ground: '⛰️', flying: '🦅', psychic: '🧠', bug: '🐛',
+            rock: '🪨', ghost: '👻', dragon: '🐉', dark: '🌙',
+            steel: '⚙️', fairy: '✨'
+        };
+
+        // Carrega todos os tipos
+        async function loadTypes() {
+            try {
+                const response = await fetch(`${API_URL}type/`);
+                const data = await response.json();
+                
+                const types = data.results.filter(t => t.name !== 'unknown' && t.name !== 'shadow');
+                
+                const typePromises = types.map(type =>
+                    fetch(`${API_URL}type/${type.name}`).then(r => r.json())
+                );
+                
+                allTypesCache = await Promise.all(typePromises);
+                displayTypes(allTypesCache);
+            } catch (error) {
+                document.getElementById('typesContainer').innerHTML = 
+                    `<div class="alert alert-danger">Erro ao carregar tipos: ${error.message}</div>`;
+            }
+        }
+
+        // Exibe os tipos
+        function displayTypes(types) {
+            const container = document.getElementById('typesContainer');
+            container.innerHTML = '';
+
+            types.forEach(type => {
+                const typeCard = document.createElement('div');
+                typeCard.className = 'type-card';
+                typeCard.onclick = () => loadPokemonByType(type.name);
+
+                const superEffectiveAgainst = type.damage_relations.double_damage_to.slice(0, 3);
+                const weakToThese = type.damage_relations.double_damage_from.slice(0, 3);
+
+                typeCard.innerHTML = `
+                    <div class="type-card-header">
+                        <div class="type-icon">${typeIcons[type.name] || '❓'}</div>
+                        <div class="type-name">${type.name}</div>
+                    </div>
+                    <div class="type-info">
+                        <div class="type-stat">
+                            <div class="stat-label">Efetivo contra</div>
+                            <div class="stat-value">${superEffectiveAgainst.map(t => t.name).join(', ') || 'Nenhum'}</div>
+                        </div>
+                        <div class="type-stat">
+                            <div class="stat-label">Fraco para</div>
+                            <div class="stat-value">${weakToThese.map(t => t.name).join(', ') || 'Nenhum'}</div>
+                        </div>
+                        <div class="type-stat">
+                            <div class="stat-label">Total de Pokémon</div>
+                            <div class="stat-value">${type.pokemon.length}</div>
+                        </div>
+                    </div>
+                `;
+
+                typeCard.querySelector('.type-info').insertAdjacentHTML(
+                    'beforeend',
+                    `<button class="details-btn" type="button" onclick="event.stopPropagation(); openTypeModalByName('${type.name}')">Ver detalhes</button>`
+                );
+
+                container.appendChild(typeCard);
+            });
+        }
+
+        // Carrega Pokémon por tipo
+        async function loadPokemonByType(typeName) {
+            try {
+                const response = await fetch(`${API_URL}type/${typeName}`);
+                const type = await response.json();
+
+                const pokemonList = type.pokemon.slice(0, 30);
+                const pokemonPromises = pokemonList.map(p =>
+                    fetch(`${API_URL}pokemon/${p.pokemon.name}`).then(r => r.json())
+                );
+
+                const pokemonData = await Promise.all(pokemonPromises);
+                displayPokemonList(typeName, pokemonData);
+                
+                document.getElementById('pokemonContainer').classList.add('active');
+                document.querySelector('.pokemon-list h3').innerHTML = 
+                    `<i class="material-icons">pets</i> Pokémon do tipo <strong>${typeName}</strong>`;
+                
+                window.scrollTo({ top: document.getElementById('pokemonContainer').offsetTop - 100, behavior: 'smooth' });
+            } catch (error) {
+                alert('Erro ao carregar Pokémon: ' + error.message);
+            }
+        }
+
+        // Exibe lista de Pokémon
+        function displayPokemonList(typeName, pokemonList) {
+            const grid = document.getElementById('pokemonGrid');
+            grid.innerHTML = '';
+
+            pokemonList.forEach(pokemon => {
+                const img = pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default || '';
+                
+                const item = document.createElement('div');
+                item.className = 'pokemon-item';
+                item.innerHTML = `
+                    <img src="${img}" alt="${pokemon.name}" style="width: 100%; max-height: 100px; object-fit: contain;">
+                    <div class="pokemon-name">#${pokemon.id} ${pokemon.name}</div>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function openTypeModal(type) {
+            const modal = document.getElementById('typeModal');
+            const title = document.getElementById('typeModalTitle');
+            const subtitle = document.getElementById('typeModalSubtitle');
+            const body = document.getElementById('typeModalBody');
+            const dr = type.damage_relations;
+
+            title.textContent = type.name;
+            subtitle.textContent = `Pokemon: ${type.pokemon.length} | Moves: ${type.moves.length}`;
+            body.innerHTML = `
+                <div class="modal-section">
+                    <div class="modal-grid">
+                        <div class="info-item"><div class="info-label">Name</div><div class="info-value">${type.name}</div></div>
+                        <div class="info-item"><div class="info-label">Pokemon Count</div><div class="info-value">${type.pokemon.length}</div></div>
+                        <div class="info-item"><div class="info-label">Move Count</div><div class="info-value">${type.moves.length}</div></div>
+                        <div class="info-item"><div class="info-label">Type ID</div><div class="info-value">${type.id}</div></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title"><i class="material-icons">flaky</i> Damage Relations</div>
+                    <div class="modal-grid">
+                        <div class="info-item"><div class="info-label">Double Damage To</div><div class="info-value">${dr.double_damage_to.map(x => x.name).join(', ') || 'None'}</div></div>
+                        <div class="info-item"><div class="info-label">Double Damage From</div><div class="info-value">${dr.double_damage_from.map(x => x.name).join(', ') || 'None'}</div></div>
+                        <div class="info-item"><div class="info-label">Half Damage To</div><div class="info-value">${dr.half_damage_to.map(x => x.name).join(', ') || 'None'}</div></div>
+                        <div class="info-item"><div class="info-label">Half Damage From</div><div class="info-value">${dr.half_damage_from.map(x => x.name).join(', ') || 'None'}</div></div>
+                        <div class="info-item"><div class="info-label">No Damage To</div><div class="info-value">${dr.no_damage_to.map(x => x.name).join(', ') || 'None'}</div></div>
+                        <div class="info-item"><div class="info-label">No Damage From</div><div class="info-value">${dr.no_damage_from.map(x => x.name).join(', ') || 'None'}</div></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title"><i class="material-icons">flash_on</i> Sample Moves</div>
+                    <div class="list-grid">${type.moves.slice(0, 24).map(move => `<div class="list-item">${move.name}</div>`).join('')}</div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title"><i class="material-icons">pets</i> Sample Pokemon</div>
+                    <div class="list-grid">${type.pokemon.slice(0, 24).map(entry => `<div class="list-item">${entry.pokemon.name}</div>`).join('')}</div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openTypeModalByName(typeName) {
+            const modalType = allTypesCache.find(type => type.name === typeName);
+            if (modalType) {
+                openTypeModal(modalType);
+            }
+        }
+
+        function closeTypeModal() {
+            const modal = document.getElementById('typeModal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('closeTypeModal').addEventListener('click', closeTypeModal);
+        document.getElementById('typeModal').addEventListener('click', (event) => {
+            if (event.target === document.getElementById('typeModal')) {
+                closeTypeModal();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && document.getElementById('typeModal').classList.contains('active')) {
+                closeTypeModal();
+            }
+        });
+
+        // Carrega ao iniciar
+        loadTypes();
+    </script>
+</body>
+</html>

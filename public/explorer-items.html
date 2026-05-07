@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Itens - Pokédex</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+        :root {
+            --pokemon-red: #DC143C;
+            --pokemon-yellow: #FFD700;
+            --pokemon-blue: #1E90FF;
+            --pokemon-black: #1a1a1a;
+            --pokemon-white: #F5F5F5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(30, 144, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            box-shadow: 0 8px 32px rgba(220, 20, 60, 0.3);
+            padding: 1rem 0;
+            border-bottom: 4px solid var(--pokemon-yellow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 28px;
+            color: white !important;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover { color: var(--pokemon-yellow); }
+
+        .container-main {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header,
+        .controls-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-header h1 {
+            color: var(--pokemon-red);
+            font-weight: 800;
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .page-header p { font-size: 18px; color: #555; }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--pokemon-red);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box { display: flex; gap: 15px; flex-wrap: wrap; }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--pokemon-red);
+            box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+            outline: none;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transition: all 0.35s ease;
+            border: 3px solid transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-10px) scale(1.01);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+            border-color: var(--pokemon-red);
+        }
+
+        .item-card-header {
+            background: linear-gradient(135deg, #F5F5F5 0%, #EFEFEF 100%);
+            padding: 22px 18px;
+            text-align: center;
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .item-sprite {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+
+        .item-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--pokemon-black);
+            text-transform: capitalize;
+        }
+
+        .item-content { padding: 18px; }
+
+        .item-stat {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-stat:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--pokemon-red);
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(220, 20, 60, 0.08);
+            color: var(--pokemon-red);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 10px 0 40px;
+        }
+
+        .pagination button {
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideInModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, #C71E1E 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 28px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .modal-body { padding: 30px; }
+
+        .modal-section {
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .modal-section:last-child { border-bottom: none; }
+
+        .modal-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--pokemon-red);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(220, 20, 60, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid var(--pokemon-red);
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pokemon-black);
+            text-transform: capitalize;
+        }
+
+        .list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .list-item {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            text-transform: capitalize;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--pokemon-black);
+        }
+
+        .effect-box {
+            background: rgba(30, 144, 255, 0.05);
+            border-left: 3px solid var(--pokemon-blue);
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .effect-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .effect-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .loading-inline {
+            color: #666;
+            font-size: 14px;
+        }
+
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInModal { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 32px; }
+            .items-grid { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; max-height: 95vh; }
+            .modal-grid { grid-template-columns: 1fr; }
+            .nav-links { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a href="index.html" class="navbar-brand" style="text-decoration: none;">
+                <i class="material-icons">circle</i>
+                Pokédex
+            </a>
+            <div class="nav-links">
+                <a href="index.html"><i class="material-icons">search</i> Explorar</a>
+                <a href="explorer-types.html"><i class="material-icons">label</i> Tipos</a>
+                <a href="explorer-moves.html"><i class="material-icons">flash_on</i> Movimentos</a>
+                <a href="explorer-abilities.html"><i class="material-icons">psychology</i> Habilidades</a>
+                <a href="explorer-items.html"><i class="material-icons">shopping_bag</i> Itens</a>
+                <a href="explorer-regions.html"><i class="material-icons">map</i> Regioes</a>
+                <a href="explorer-generations.html"><i class="material-icons">history</i> Geracoes</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-main">
+        <div class="page-header">
+            <h1><i class="material-icons" style="font-size: 48px;">shopping_bag</i> Explorador de Itens</h1>
+            <p>Veja custos, categorias, efeitos e quais Pokémon podem segurar cada item.</p>
+        </div>
+
+        <div class="controls-section">
+            <div class="section-title"><i class="material-icons">search</i> Buscar Item</div>
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="Digite o nome do item...">
+            </div>
+        </div>
+
+        <div id="itemsContainer" class="items-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 20px;">Carregando itens...</p>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button id="prevBtn" type="button">Anterior</button>
+            <span style="color: white; font-weight: 700;">
+                Página <span id="currentPage">1</span> de <span id="totalPages">1</span>
+            </span>
+            <button id="nextBtn" type="button">Próximo</button>
+        </div>
+    </div>
+
+    <div id="itemModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
+            <div class="modal-header">
+                <div>
+                    <h2 id="itemModalTitle">Item</h2>
+                    <div id="itemModalSubtitle" style="font-size: 14px; font-weight: 600; opacity: 0.9; margin-top: 6px;"></div>
+                </div>
+                <button class="modal-close" type="button" aria-label="Fechar modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div id="itemModalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'https://pokeapi.co/api/v2/';
+        const ITEMS_PER_PAGE = 8;
+        let allItems = [];
+        let filteredItems = [];
+        let currentPage = 1;
+
+        const itemModal = document.getElementById('itemModal');
+        const itemModalTitle = document.getElementById('itemModalTitle');
+        const itemModalSubtitle = document.getElementById('itemModalSubtitle');
+        const itemModalBody = document.getElementById('itemModalBody');
+
+        async function loadItems() {
+            try {
+                const response = await fetch(`${API_URL}item?limit=2000`);
+                const data = await response.json();
+                const promises = data.results.map(item => fetch(`${API_URL}item/${item.name}`).then(r => r.json()));
+                allItems = await Promise.all(promises);
+                allItems.sort((a, b) => a.id - b.id);
+                applyFilters();
+            } catch (error) {
+                document.getElementById('itemsContainer').innerHTML = `<div class="alert alert-danger">Erro ao carregar itens: ${error.message}</div>`;
+            }
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filteredItems = allItems.filter(item => item.name.includes(searchTerm));
+            currentPage = 1;
+            renderItems();
+        }
+
+        function renderItems() {
+            const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const pageItems = filteredItems.slice(start, start + ITEMS_PER_PAGE);
+
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+
+            const container = document.getElementById('itemsContainer');
+            if (!pageItems.length) {
+                container.innerHTML = '<div class="alert alert-warning">Nenhum item encontrado.</div>';
+                return;
+            }
+
+            container.innerHTML = pageItems.map(item => {
+                const sprite = item.sprites?.default || '';
+                const effect = item.effect_entries.find(e => e.language.name === 'en')?.short_effect || item.effect_entries[0]?.short_effect || 'Sem efeito documentado';
+                return `
+                    <div class="item-card" onclick="openItemModal('${item.name}')">
+                        <div class="item-card-header">
+                            ${sprite ? `<img class="item-sprite" src="${sprite}" alt="${item.name}">` : '<div class="loading-inline">Sem sprite</div>'}
+                            <div class="item-name">${item.name}</div>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-stat">
+                                <div class="stat-label">ID</div>
+                                <div class="stat-value">#${String(item.id).padStart(3, '0')}</div>
+                            </div>
+                            <div class="item-stat">
+                                <div class="stat-label">Cost</div>
+                                <div class="stat-value">${item.cost ?? 'N/A'}</div>
+                            </div>
+                            <div class="item-stat">
+                                <div class="stat-label">Category</div>
+                                <div class="stat-value">${item.category?.name || 'N/A'}</div>
+                            </div>
+                            <div class="item-stat">
+                                <div class="stat-label">Effect</div>
+                                <div class="stat-value">${effect}</div>
+                            </div>
+                            <div class="badge-row">
+                                <span class="badge-pill">${item.held_by_pokemon.length} held by pokemon</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openItemModal(itemName) {
+            const item = allItems.find(i => i.name === itemName);
+            if (!item) return;
+
+            const sprite = item.sprites?.default || '';
+            const effects = item.effect_entries.length
+                ? item.effect_entries.map(effect => `
+                    <div class="effect-box">
+                        <div class="effect-label">${effect.language.name}</div>
+                        <div class="effect-text">${effect.effect}</div>
+                        <div class="effect-text" style="margin-top: 8px;"><strong>Short:</strong> ${effect.short_effect}</div>
+                    </div>
+                `).join('')
+                : '<div class="loading-inline">Nenhum efeito documentado.</div>';
+
+            const held = item.held_by_pokemon.length
+                ? item.held_by_pokemon.slice(0, 24).map(entry => `<div class="list-item">${entry.pokemon.name}</div>`).join('')
+                : '<div class="loading-inline">Nenhum Pokémon associado.</div>';
+
+            itemModalTitle.textContent = `#${String(item.id).padStart(3, '0')} ${item.name}`;
+            itemModalSubtitle.textContent = `Cost: ${item.cost ?? 'N/A'} | Category: ${item.category?.name || 'N/A'}`;
+            itemModalBody.innerHTML = `
+                <div class="modal-section">
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        ${sprite ? `<img src="${sprite}" alt="${item.name}" style="width: 120px; height: 120px; object-fit: contain;">` : ''}
+                    </div>
+                    <div class="modal-grid">
+                        <div class="info-item">
+                            <div class="info-label">Name</div>
+                            <div class="info-value">${item.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">ID</div>
+                            <div class="info-value">#${String(item.id).padStart(3, '0')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cost</div>
+                            <div class="info-value">${item.cost ?? 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Category</div>
+                            <div class="info-value">${item.category?.name || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title"><i class="material-icons">description</i> Effects</div>
+                    ${effects}
+                </div>
+
+                <div class="modal-section">
+                    <div class="modal-section-title"><i class="material-icons">pets</i> Held By Pokemon (${item.held_by_pokemon.length})</div>
+                    <div class="list-grid">
+                        ${held}
+                    </div>
+                </div>
+            `;
+
+            itemModal.classList.add('active');
+            itemModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeItemModal() {
+            itemModal.classList.remove('active');
+            itemModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 1) { currentPage--; renderItems(); }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+            if (currentPage < totalPages) { currentPage++; renderItems(); }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('closeModalBtn').addEventListener('click', closeItemModal);
+        itemModal.addEventListener('click', (event) => { if (event.target === itemModal) closeItemModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && itemModal.classList.contains('active')) closeItemModal(); });
+
+        loadItems();
+    </script>
+</body>
+</html>
